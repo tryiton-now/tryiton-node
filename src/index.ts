@@ -55,6 +55,10 @@ export type Category =
 
 export type Mode = "performance" | "balanced" | "quality";
 
+export type OutputFormat = "png" | "jpeg";
+
+export type ModerationLevel = "conservative" | "permissive" | "none";
+
 export interface TryOnClothesParams {
   /** URL or base64 data URL of the person. */
   modelImage: string;
@@ -66,18 +70,12 @@ export interface TryOnClothesParams {
   subcategory?: string;
   /** Quality/speed trade-off (clothing only). */
   mode?: Mode;
-  /** Number of output images, 1–4 (clothing only). Charged per image. */
+  /** Number of output images, 1–4. Charged per image. */
   numSamples?: number;
-  /** "png" or "jpeg" (clothing only). */
-  outputFormat?: "png" | "jpeg";
-  /** Fixes randomness (clothing only). */
-  seed?: number;
-  /** Advanced (clothing only). */
-  segmentationFree?: boolean;
-  /** Advanced hint: "auto" | "model" | "flat-lay" (clothing only). */
-  garmentPhotoType?: "auto" | "model" | "flat-lay";
-  /** Advanced (clothing only). */
-  moderationLevel?: string;
+  /** Output image format, "png" or "jpeg". Defaults to "png". */
+  outputFormat?: OutputFormat;
+  /** Content moderation strictness (clothing only). Defaults to "permissive". */
+  moderationLevel?: ModerationLevel;
 }
 
 export interface TryOnHairstyleParams {
@@ -87,6 +85,10 @@ export interface TryOnHairstyleParams {
   haircut: string;
   /** Optional free-text color, e.g. "ash blonde". Omit to keep current color. */
   hairColor?: string;
+  /** Number of output images, 1–4. Charged per image. */
+  numSamples?: number;
+  /** Output image format, "png" or "jpeg". Defaults to "png". */
+  outputFormat?: OutputFormat;
 }
 
 export interface TryOnTattooParams {
@@ -96,6 +98,10 @@ export interface TryOnTattooParams {
   designImage: string;
   /** Optional free-text placement/size, max 140 chars. */
   placement?: string;
+  /** Number of output images, 1–4. Charged per image. */
+  numSamples?: number;
+  /** Output image format, "png" or "jpeg". Defaults to "png". */
+  outputFormat?: OutputFormat;
 }
 
 export interface WaitOptions {
@@ -182,9 +188,6 @@ export class TryItOn {
       mode: params.mode,
       num_samples: params.numSamples,
       output_format: params.outputFormat,
-      seed: params.seed,
-      segmentation_free: params.segmentationFree,
-      garment_photo_type: params.garmentPhotoType,
       moderation_level: params.moderationLevel,
     };
     const res = await this.request<{ jobId: string }>("POST", "/tryon/clothes", body);
@@ -193,14 +196,26 @@ export class TryItOn {
 
   /** Restyle a person's hair. Returns the job id. */
   async tryOnHairstyle(params: TryOnHairstyleParams): Promise<string> {
-    const body = { face_image: params.faceImage, haircut: params.haircut, hair_color: params.hairColor };
+    const body = {
+      face_image: params.faceImage,
+      haircut: params.haircut,
+      hair_color: params.hairColor,
+      num_samples: params.numSamples,
+      output_format: params.outputFormat,
+    };
     const res = await this.request<{ jobId: string }>("POST", "/tryon/hairstyle", body);
     return res.jobId;
   }
 
   /** Ink a design onto skin. Returns the job id. */
   async tryOnTattoo(params: TryOnTattooParams): Promise<string> {
-    const body = { body_image: params.bodyImage, design_image: params.designImage, placement: params.placement };
+    const body = {
+      body_image: params.bodyImage,
+      design_image: params.designImage,
+      placement: params.placement,
+      num_samples: params.numSamples,
+      output_format: params.outputFormat,
+    };
     const res = await this.request<{ jobId: string }>("POST", "/tryon/tattoo", body);
     return res.jobId;
   }
