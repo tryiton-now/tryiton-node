@@ -91,6 +91,21 @@ export interface TryOnHairstyleParams {
   outputFormat?: OutputFormat;
 }
 
+/**
+ * Rectangle on the body image, normalized 0–1 from its TOP-LEFT corner.
+ * Each side must be at least 0.06 of the image.
+ */
+export interface TattooRegion {
+  /** Left edge, 0–1. */
+  x: number;
+  /** Top edge, 0–1. */
+  y: number;
+  /** Width, 0–1. */
+  w: number;
+  /** Height, 0–1. */
+  h: number;
+}
+
 export interface TryOnTattooParams {
   /** URL or base64 data URL — a close-up of bare skin. */
   bodyImage: string;
@@ -98,6 +113,12 @@ export interface TryOnTattooParams {
   designImage: string;
   /** Optional free-text placement/size, max 140 chars. */
   placement?: string;
+  /**
+   * Optional exact spot for the ink, as a rectangle on the body image. Pins WHERE
+   * the tattoo goes, so `placement` then only describes size/style. Omit it and the
+   * placement text alone decides.
+   */
+  region?: TattooRegion;
   /** Number of output images, 1–4. Charged per image. */
   numSamples?: number;
   /** Output image format, "png" or "jpeg". Defaults to "png". */
@@ -213,6 +234,7 @@ export class TryItOn {
       body_image: params.bodyImage,
       design_image: params.designImage,
       placement: params.placement,
+      region: params.region,
       num_samples: params.numSamples,
       output_format: params.outputFormat,
     };

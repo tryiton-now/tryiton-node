@@ -60,8 +60,10 @@ Additional options (`mode` and `moderationLevel` for clothing; `numSamples` 1–
 // Hairstyle try-on (see the HAIRCUTS export for all supported values)
 await client.tryOnHairstyle({ faceImage, haircut: "BuzzCut", hairColor: "ash blonde" });
 
-// Tattoo try-on
+// Tattoo try-on — place it with free text...
 await client.tryOnTattoo({ bodyImage, designImage, placement: "on the right forearm, small" });
+// ...or pin the exact spot with a region box (normalized 0–1, from the image's top-left)
+await client.tryOnTattoo({ bodyImage, designImage, region: { x: 0.32, y: 0.18, w: 0.28, h: 0.34 } });
 
 // Poll a job manually, or check your credit balance
 const status = await client.getStatus(jobId);   // { status, output, error }
