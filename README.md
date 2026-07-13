@@ -27,7 +27,7 @@ import { TryItOn } from "tryiton";
 const client = new TryItOn({ apiKey: process.env.TRYITON_API_KEY });
 
 // Submit a clothing try-on
-const jobId = await client.tryOnClothes({
+const jobId = await client.tryOnFashion({
   modelImage: "https://example.com/model.jpg",
   garmentImage: "https://example.com/tshirt.jpg",
   category: "clothing",
@@ -43,7 +43,7 @@ Image inputs accept a public URL or a base64 data URL (`data:image/png;base64,..
 
 ## Core parameters
 
-`tryOnClothes` covers clothing and accessory try-on. The most important parameters:
+`tryOnFashion` covers clothing and accessory try-on. The most important parameters:
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
@@ -78,7 +78,7 @@ All failures throw `TryItOnError`, which carries the HTTP status code and the AP
 import { TryItOn, TryItOnError } from "tryiton";
 
 try {
-  await client.tryOnClothes({ /* ... */ });
+  await client.tryOnFashion({ /* ... */ });
 } catch (err) {
   if (err instanceof TryItOnError) {
     console.error(err.status, err.errorName, err.message); // e.g. 429, "OutOfCredits"

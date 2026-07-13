@@ -59,7 +59,7 @@ export type OutputFormat = "png" | "jpeg";
 
 export type ModerationLevel = "conservative" | "permissive" | "none";
 
-export interface TryOnClothesParams {
+export interface TryOnFashionParams {
   /** URL or base64 data URL of the person. */
   modelImage: string;
   /** URL or base64 data URL of the garment/accessory. */
@@ -200,7 +200,7 @@ export class TryItOn {
   }
 
   /** Put a garment or accessory on a person. Returns the job id. */
-  async tryOnClothes(params: TryOnClothesParams): Promise<string> {
+  async tryOnFashion(params: TryOnFashionParams): Promise<string> {
     const body = {
       model_image: params.modelImage,
       garment_image: params.garmentImage,
@@ -211,7 +211,7 @@ export class TryItOn {
       output_format: params.outputFormat,
       moderation_level: params.moderationLevel,
     };
-    const res = await this.request<{ jobId: string }>("POST", "/tryon/clothes", body);
+    const res = await this.request<{ jobId: string }>("POST", "/tryon/fashion", body);
     return res.jobId;
   }
 
