@@ -3,7 +3,13 @@
 All notable changes to `tryiton` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
-## [2.1.0] - Unreleased
+## [Unreleased]
+
+### Deprecated
+
+- `TryOnFashionParams.mode` and `moderationLevel` (and the `Mode` / `ModerationLevel` types): the API ignores `mode` and validates `moderation_level` without applying it. Marked `@deprecated`; removed in 3.0.
+
+## [2.1.0] - 2026-11-26
 
 ### Added
 
@@ -58,7 +64,8 @@ All notable changes to `tryiton` are documented here. The format follows
 
 First release: clothes, hairstyle and tattoo try-on, `getStatus`, `waitForResult`, `getCredits` and `TryItOnError`.
 
-[2.1.0]: https://github.com/tryiton-now/tryiton-node/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/tryiton-now/tryiton-node/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/tryiton-now/tryiton-node/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/tryiton-now/tryiton-node/compare/v1.1.1...v2.0.0
 [1.1.1]: https://github.com/tryiton-now/tryiton-node/compare/v1.0.0...v1.1.1
 [1.0.0]: https://github.com/tryiton-now/tryiton-node/compare/v0.1.0...v1.0.0
