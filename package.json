@@ -1,6 +1,6 @@
 {
   "name": "tryiton",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Official JavaScript/TypeScript SDK for the TryItOn virtual try-on API.",
   "keywords": [
     "tryiton",
@@ -38,13 +38,17 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean",
-    "prepublishOnly": "npm run build"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vite": "^6.4.6",
+    "vitest": "^3.2.7"
   }
 }
