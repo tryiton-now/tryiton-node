@@ -50,10 +50,12 @@ export type Category =
   | "accessories"
   | "others";
 
+/** @deprecated See `TryOnFashionParams.mode`. */
 export type Mode = "performance" | "balanced" | "quality";
 
 export type OutputFormat = "png" | "jpeg";
 
+/** @deprecated See `TryOnFashionParams.moderationLevel`. */
 export type ModerationLevel = "conservative" | "permissive" | "none";
 
 export interface TryOnFashionParams {
@@ -65,13 +67,15 @@ export interface TryOnFashionParams {
   category?: Category;
   /** Required for `clothing`, `jewelry`, `accessories` (e.g. "tops"). */
   subcategory?: string;
-  /** Quality/speed trade-off (clothing only). */
+  /** @deprecated Ignored by the API; will be removed in 3.0. */
   mode?: Mode;
   /** Number of output images, 1–4. Charged per image. */
   numSamples?: number;
   /** Output image format, "png" or "jpeg". Defaults to "png". */
   outputFormat?: OutputFormat;
-  /** Content moderation strictness (clothing only). Defaults to "permissive". */
+  /**
+   * @deprecated Validated but has no effect: the AI providers' own safety filters always apply. Will be removed in 3.0.
+   */
   moderationLevel?: ModerationLevel;
 }
 
