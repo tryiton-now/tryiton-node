@@ -1,0 +1,296 @@
+{
+  "_comment": "Source of truth for the TryItOn SDK contract tests. Edit HERE only (tryiton/backend/api-contract/), then run `node tryiton-sdk/sync-contract.mjs` to copy it into every SDK repo. Every SDK test suite runs every case. Method and param names are canonical camelCase; each SDK maps them to its own idiom (try_on_fashion / TryOnFashion / ...). In expectResult objects, an SDK may also carry the envelope's `ok` field (e.g. getStatus returns the whole body): ignore keys the case does not list only for `ok`; every listed key must match.",
+  "version": 1,
+  "baseUrl": "https://api.test/api/v1",
+  "apiKey": "test-key",
+  "methodCases": [
+    {
+      "name": "tryOnFashion sends every option snake_case and returns the job id",
+      "method": "tryOnFashion",
+      "params": {
+        "modelImage": "https://example.com/model.jpg",
+        "garmentImage": "https://example.com/shirt.jpg",
+        "category": "clothing",
+        "subcategory": "tops",
+        "mode": "quality",
+        "numSamples": 2,
+        "outputFormat": "jpeg",
+        "moderationLevel": "conservative"
+      },
+      "responses": [{ "status": 201, "body": { "ok": true, "jobId": "job_1" } }],
+      "expectRequests": [
+        {
+          "method": "POST",
+          "path": "/tryon/fashion",
+          "body": {
+            "model_image": "https://example.com/model.jpg",
+            "garment_image": "https://example.com/shirt.jpg",
+            "category": "clothing",
+            "subcategory": "tops",
+            "mode": "quality",
+            "num_samples": 2,
+            "output_format": "jpeg",
+            "moderation_level": "conservative"
+          }
+        }
+      ],
+      "expectResult": "job_1"
+    },
+    {
+      "name": "tryOnFashion omits unset options",
+      "method": "tryOnFashion",
+      "params": { "modelImage": "data:image/png;base64,AAAA", "garmentImage": "https://example.com/shirt.jpg" },
+      "responses": [{ "status": 201, "body": { "ok": true, "jobId": "job_2" } }],
+      "expectRequests": [
+        {
+          "method": "POST",
+          "path": "/tryon/fashion",
+          "body": { "model_image": "data:image/png;base64,AAAA", "garment_image": "https://example.com/shirt.jpg" }
+        }
+      ],
+      "expectResult": "job_2"
+    },
+    {
+      "name": "tryOnHairstyle",
+      "method": "tryOnHairstyle",
+      "params": { "faceImage": "https://example.com/face.jpg", "haircut": "BuzzCut", "hairColor": "ash blonde", "numSamples": 1, "outputFormat": "png" },
+      "responses": [{ "status": 201, "body": { "ok": true, "jobId": "job_3" } }],
+      "expectRequests": [
+        {
+          "method": "POST",
+          "path": "/tryon/hairstyle",
+          "body": { "face_image": "https://example.com/face.jpg", "haircut": "BuzzCut", "hair_color": "ash blonde", "num_samples": 1, "output_format": "png" }
+        }
+      ],
+      "expectResult": "job_3"
+    },
+    {
+      "name": "tryOnTattoo with a region",
+      "method": "tryOnTattoo",
+      "params": {
+        "bodyImage": "https://example.com/arm.jpg",
+        "designImage": "https://example.com/design.png",
+        "placement": "fine-line, black ink",
+        "region": { "x": 0.32, "y": 0.18, "w": 0.28, "h": 0.34 }
+      },
+      "responses": [{ "status": 201, "body": { "ok": true, "jobId": "job_4" } }],
+      "expectRequests": [
+        {
+          "method": "POST",
+          "path": "/tryon/tattoo",
+          "body": {
+            "body_image": "https://example.com/arm.jpg",
+            "design_image": "https://example.com/design.png",
+            "placement": "fine-line, black ink",
+            "region": { "x": 0.32, "y": 0.18, "w": 0.28, "h": 0.34 }
+          }
+        }
+      ],
+      "expectResult": "job_4"
+    },
+    {
+      "name": "getStatus of a completed job",
+      "method": "getStatus",
+      "params": { "jobId": "job_1" },
+      "responses": [{ "status": 200, "body": { "ok": true, "status": "completed", "output": ["https://cdn.test/a.png"], "error": null } }],
+      "expectRequests": [{ "method": "GET", "path": "/status/job_1" }],
+      "expectResult": { "status": "completed", "output": ["https://cdn.test/a.png"], "error": null }
+    },
+    {
+      "name": "getStatus of a failed job: error is a plain string",
+      "method": "getStatus",
+      "params": { "jobId": "job_9" },
+      "responses": [{ "status": 200, "body": { "ok": true, "status": "failed", "output": [], "error": "We couldn't find a person in the photo." } }],
+      "expectRequests": [{ "method": "GET", "path": "/status/job_9" }],
+      "expectResult": { "status": "failed", "output": [], "error": "We couldn't find a person in the photo." }
+    },
+    {
+      "name": "getStatus escapes the job id",
+      "method": "getStatus",
+      "params": { "jobId": "a/b c" },
+      "responses": [{ "status": 200, "body": { "ok": true, "status": "processing", "output": [], "error": null } }],
+      "expectRequests": [{ "method": "GET", "path": "/status/a%2Fb%20c" }],
+      "expectResult": { "status": "processing", "output": [], "error": null }
+    },
+    {
+      "name": "getCredits",
+      "method": "getCredits",
+      "params": {},
+      "responses": [{ "status": 200, "body": { "ok": true, "credits": { "on_demand": 0, "subscription": 58, "purchased": 1, "reserved": 0 } } }],
+      "expectRequests": [{ "method": "GET", "path": "/credits" }],
+      "expectResult": { "on_demand": 0, "subscription": 58, "purchased": 1, "reserved": 0 }
+    },
+    {
+      "name": "waitForResult polls until completed",
+      "method": "waitForResult",
+      "params": { "jobId": "job_1" },
+      "responses": [
+        { "status": 200, "body": { "ok": true, "status": "processing", "output": [], "error": null } },
+        { "status": 200, "body": { "ok": true, "status": "completed", "output": ["https://cdn.test/a.png", "https://cdn.test/b.png"], "error": null } }
+      ],
+      "expectRequests": [
+        { "method": "GET", "path": "/status/job_1" },
+        { "method": "GET", "path": "/status/job_1" }
+      ],
+      "expectResult": ["https://cdn.test/a.png", "https://cdn.test/b.png"]
+    },
+    {
+      "name": "waitForResult raises the job's own failure reason",
+      "method": "waitForResult",
+      "params": { "jobId": "job_9" },
+      "responses": [{ "status": 200, "body": { "ok": true, "status": "failed", "output": [], "error": "We couldn't find a person in the photo." } }],
+      "expectRequests": [{ "method": "GET", "path": "/status/job_9" }],
+      "expectError": { "status": null, "errorName": "ProcessingError", "message": "We couldn't find a person in the photo." }
+    },
+    {
+      "name": "getLiveConfig strips ok",
+      "method": "getLiveConfig",
+      "params": {},
+      "responses": [{ "status": 200, "body": { "ok": true, "enabled": true, "secondsPerCredit": 2, "maxSeconds": 180, "minCredits": 5, "maxConcurrentSessions": 3 } }],
+      "expectRequests": [{ "method": "GET", "path": "/live/config" }],
+      "expectResult": { "enabled": true, "secondsPerCredit": 2, "maxSeconds": 180, "minCredits": 5, "maxConcurrentSessions": 3 }
+    },
+    {
+      "name": "prepareLiveGarment",
+      "method": "prepareLiveGarment",
+      "params": { "garmentImage": "https://example.com/shirt.jpg", "category": "clothing", "subcategory": "tops" },
+      "responses": [
+        {
+          "status": 201,
+          "body": { "ok": true, "garment": { "id": "g1", "category": "clothing", "subcategory": "tops", "description": "a navy polo", "createdAt": "2026-11-26T12:20:59.512Z" } }
+        }
+      ],
+      "expectRequests": [
+        { "method": "POST", "path": "/live/garments", "body": { "garment_image": "https://example.com/shirt.jpg", "category": "clothing", "subcategory": "tops" } }
+      ],
+      "expectResult": { "id": "g1", "category": "clothing", "subcategory": "tops", "description": "a navy polo", "createdAt": "2026-11-26T12:20:59.512Z" }
+    },
+    {
+      "name": "startLiveSession returns the whole response unchanged",
+      "method": "startLiveSession",
+      "params": { "garmentId": "g1", "maxSeconds": 30, "endUserId": "u1", "allowedOrigin": "https://shop.test" },
+      "responses": [
+        {
+          "status": 201,
+          "body": {
+            "ok": true,
+            "session": {
+              "id": "s1",
+              "status": "active",
+              "endReason": null,
+              "seconds": 0,
+              "creditsCharged": 0,
+              "endUserId": "u1",
+              "createdAt": "2026-11-26T12:21:57.402Z",
+              "endedAt": null
+            },
+            "clientSecret": "cs",
+            "connection": { "provider": "decart", "model": "lucy-vton-latest", "token": "tok" },
+            "secondsPerCredit": 2,
+            "maxSeconds": 30,
+            "secondsLeft": 30,
+            "garment": {
+              "id": "g1",
+              "category": "clothing",
+              "subcategory": "tops",
+              "description": null,
+              "createdAt": "2026-11-26T12:20:59.512Z",
+              "input": { "prompt": "p", "enhancePrompt": true, "referenceImage": "data:image/jpeg;base64,AA" }
+            }
+          }
+        }
+      ],
+      "expectRequests": [
+        { "method": "POST", "path": "/live/sessions", "body": { "garment_id": "g1", "max_seconds": 30, "end_user_id": "u1", "allowed_origin": "https://shop.test" } }
+      ],
+      "expectResultIsResponseBody": true
+    },
+    {
+      "name": "startLiveSession with no options sends an empty object",
+      "method": "startLiveSession",
+      "params": {},
+      "responses": [
+        {
+          "status": 201,
+          "body": {
+            "ok": true,
+            "session": { "id": "s2", "status": "active", "endReason": null, "seconds": 0, "creditsCharged": 0, "endUserId": null, "createdAt": "x", "endedAt": null },
+            "clientSecret": "cs",
+            "connection": { "provider": "decart", "model": "lucy-vton-latest", "token": "tok" },
+            "secondsPerCredit": 2,
+            "maxSeconds": 180,
+            "secondsLeft": 116,
+            "garment": null
+          }
+        }
+      ],
+      "expectRequests": [{ "method": "POST", "path": "/live/sessions", "body": {} }],
+      "expectResultIsResponseBody": true
+    },
+    {
+      "name": "getLiveSession escapes the id",
+      "method": "getLiveSession",
+      "params": { "sessionId": "a/b" },
+      "responses": [
+        {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "session": { "id": "a/b", "status": "ended", "endReason": "user", "seconds": 9, "creditsCharged": 5, "endUserId": null, "createdAt": "x", "endedAt": "y" }
+          }
+        }
+      ],
+      "expectRequests": [{ "method": "GET", "path": "/live/sessions/a%2Fb" }],
+      "expectResult": { "id": "a/b", "status": "ended", "endReason": "user", "seconds": 9, "creditsCharged": 5, "endUserId": null, "createdAt": "x", "endedAt": "y" }
+    },
+    {
+      "name": "stopLiveSession posts an empty object",
+      "method": "stopLiveSession",
+      "params": { "sessionId": "s1" },
+      "responses": [
+        {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "session": { "id": "s1", "status": "ended", "endReason": "user", "seconds": 4, "creditsCharged": 2, "endUserId": "u1", "createdAt": "x", "endedAt": "y" }
+          }
+        }
+      ],
+      "expectRequests": [{ "method": "POST", "path": "/live/sessions/s1/stop", "body": {} }],
+      "expectResult": { "id": "s1", "status": "ended", "endReason": "user", "seconds": 4, "creditsCharged": 2, "endUserId": "u1", "createdAt": "x", "endedAt": "y" }
+    }
+  ],
+  "errorCases": [
+    {
+      "name": "API envelope",
+      "response": { "status": 429, "body": { "ok": false, "error": { "name": "OutOfCredits", "message": "You do not have enough credits left. Please buy more." } } },
+      "expectError": { "status": 429, "errorName": "OutOfCredits", "message": "You do not have enough credits left. Please buy more." }
+    },
+    {
+      "name": "envelope without a name",
+      "response": { "status": 400, "body": { "ok": false, "error": { "message": "Invalid category/subcategory." } } },
+      "expectError": { "status": 400, "errorName": null, "message": "Invalid category/subcategory." }
+    },
+    {
+      "name": "legacy top-level strings",
+      "response": { "status": 400, "body": { "error": "BadRequest", "message": "legacy message" } },
+      "expectError": { "status": 400, "errorName": "BadRequest", "message": "legacy message" }
+    },
+    {
+      "name": "empty body",
+      "response": { "status": 502, "raw": "" },
+      "expectError": { "status": 502, "errorName": null, "message": "HTTP 502" }
+    },
+    {
+      "name": "non-JSON body",
+      "response": { "status": 500, "raw": "<html>oops</html>" },
+      "expectError": { "status": 500, "errorName": null, "messageAnyOf": ["HTTP 500", "<html>oops</html>"] }
+    }
+  ],
+  "_errorCasesUsage": "Run each errorCase against getCredits() (GET /credits) and getLiveSession('s1'); both must raise the SDK's error type with the expected fields.",
+  "userAgent": {
+    "_comment": "Every request sends User-Agent: tryiton-<lang>/<SDK version>, e.g. tryiton-node/2.1.0, tryiton-python/2.1.0, tryiton-go/2.1.0, tryiton-php/2.1.0, tryiton-ruby/2.1.0. Tests assert the exact string from the SDK's version constant, and that the constant matches the package manifest where one exists.",
+    "pattern": "^tryiton-(node|python|go|php|ruby)/\\d+\\.\\d+\\.\\d+$"
+  },
+  "authHeader": "Bearer test-key"
+}

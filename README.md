@@ -70,6 +70,30 @@ const status = await client.getStatus(jobId);   // { status, output, error }
 const credits = await client.getCredits();        // { on_demand, subscription, purchased, reserved }
 ```
 
+## Live try-on (real-time webcam)
+
+Your server prepares garments and starts sessions with the API key. The shopper's browser streams with the
+[`tryiton-live`](https://www.npmjs.com/package/tryiton-live) package, using only the session-scoped response.
+
+```ts
+// Once per product, e.g. at catalog sync (cached per image + category):
+const garment = await client.prepareLiveGarment({ garmentImage: productImageUrl, category: "clothing", subcategory: "tops" });
+
+// When a shopper opens live try-on. Return `start` to the browser as-is:
+const start = await client.startLiveSession({
+  garmentId: garment.id,
+  endUserId: shopper.id,                       // one stream per end user
+  allowedOrigin: "https://shop.example.com",   // locks the media token to your site
+});
+
+await client.getLiveSession(start.session.id);   // { status, seconds, creditsCharged, ... }
+await client.stopLiveSession(start.session.id);  // end it from your server
+await client.getLiveConfig();                    // { enabled, secondsPerCredit, maxSeconds, ... }
+```
+
+Billing is per `secondsPerCredit` seconds of streamed video, from the first try-on frame. Garment switches during a
+session are free.
+
 ## Error handling
 
 All failures throw `TryItOnError`, which carries the HTTP status code and the API error name.
@@ -94,6 +118,19 @@ try {
 ## Documentation
 
 Full documentation, parameter reference, and guides: [docs.tryiton.now](https://docs.tryiton.now)
+
+## Development
+
+```bash
+npm ci
+npm test            # vitest: contract cases + unit tests
+npx tsc --noEmit    # type check
+npm run build       # tsup → dist/ (ESM + CJS + .d.ts)
+```
+
+`test/fixtures/sdk-cases.json` holds the contract cases every TryItOn SDK runs against a fake HTTP layer. It is
+generated: edit `tryiton/backend/api-contract/sdk-cases.json` in the main repo, then run
+`node tryiton-sdk/sync-contract.mjs` to copy it into each SDK. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
