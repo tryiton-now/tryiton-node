@@ -5,6 +5,20 @@ All notable changes to `tryiton` are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-27
+
+### Added
+
+- `prepareLiveGarment()` takes four optional overrides: `detailImages` (up to 3 extra views that only sharpen the
+  description), `description` (your own item description, max 200 chars, used inside the generated prompt),
+  `instructions` (your own prompt, max 1000 chars, used verbatim) and `enhancePrompt` (`false` turns off the
+  stream's prompt rewriting; the API defaults to `true`).
+- `prepareLiveOutfit({ garmentIds, instructions?, enhancePrompt? })` combines 2–3 prepared garments into one outfit
+  (`POST /live/outfits`). Its `id` works wherever a garment id does: `startLiveSession({ garmentId })` and the
+  browser's `switchGarment`. New `PrepareLiveOutfitParams` type.
+- `LiveGarment` gains `prompt`, `enhancePrompt` and `items` (an outfit's garment ids top to bottom, else `null`).
+  `category` can be `"outfit"`.
+
 ### Deprecated
 
 - `TryOnFashionParams.mode` and `moderationLevel` (and the `Mode` / `ModerationLevel` types): the API ignores `mode` and validates `moderation_level` without applying it. Marked `@deprecated`; removed in 3.0.

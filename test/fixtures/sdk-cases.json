@@ -157,13 +157,189 @@
       "responses": [
         {
           "status": 201,
-          "body": { "ok": true, "garment": { "id": "g1", "category": "clothing", "subcategory": "tops", "description": "a navy polo", "createdAt": "2026-11-26T12:20:59.512Z" } }
+          "body": { "ok": true, "garment": { "id": "g1", "category": "clothing", "subcategory": "tops", "description": "a navy polo", "prompt": "Substitute the current top with a navy polo shown in the reference image, matching its color, material, and fit.", "enhancePrompt": true, "items": null, "createdAt": "2026-11-26T12:20:59.512Z" } }
         }
       ],
       "expectRequests": [
         { "method": "POST", "path": "/live/garments", "body": { "garment_image": "https://example.com/shirt.jpg", "category": "clothing", "subcategory": "tops" } }
       ],
-      "expectResult": { "id": "g1", "category": "clothing", "subcategory": "tops", "description": "a navy polo", "createdAt": "2026-11-26T12:20:59.512Z" }
+      "expectResult": { "id": "g1", "category": "clothing", "subcategory": "tops", "description": "a navy polo", "prompt": "Substitute the current top with a navy polo shown in the reference image, matching its color, material, and fit.", "enhancePrompt": true, "items": null, "createdAt": "2026-11-26T12:20:59.512Z" }
+    },
+    {
+      "name": "prepareLiveGarment with every override",
+      "method": "prepareLiveGarment",
+      "params": {
+        "garmentImage": "https://example.com/look.jpg",
+        "category": "footwear",
+        "detailImages": [
+          "https://example.com/boots-side.jpg",
+          "data:image/png;base64,AAAA"
+        ],
+        "description": "black leather knee-high boots",
+        "instructions": "Replace only the shoes with the boots.",
+        "enhancePrompt": false
+      },
+      "responses": [
+        {
+          "status": 201,
+          "body": {
+            "ok": true,
+            "garment": {
+              "id": "g2",
+              "category": "footwear",
+              "subcategory": null,
+              "description": "black leather knee-high boots",
+              "prompt": "Replace only the shoes with the boots.",
+              "enhancePrompt": false,
+              "items": null,
+              "createdAt": "2026-11-26T12:20:59.512Z"
+            }
+          }
+        }
+      ],
+      "expectRequests": [
+        {
+          "method": "POST",
+          "path": "/live/garments",
+          "body": {
+            "garment_image": "https://example.com/look.jpg",
+            "category": "footwear",
+            "detail_images": [
+              "https://example.com/boots-side.jpg",
+              "data:image/png;base64,AAAA"
+            ],
+            "description": "black leather knee-high boots",
+            "instructions": "Replace only the shoes with the boots.",
+            "enhance_prompt": false
+          }
+        }
+      ],
+      "expectResult": {
+        "id": "g2",
+        "category": "footwear",
+        "subcategory": null,
+        "description": "black leather knee-high boots",
+        "prompt": "Replace only the shoes with the boots.",
+        "enhancePrompt": false,
+        "items": null,
+        "createdAt": "2026-11-26T12:20:59.512Z"
+      }
+    },
+    {
+      "name": "prepareLiveOutfit returns the outfit",
+      "method": "prepareLiveOutfit",
+      "params": {
+        "garmentIds": [
+          "g1",
+          "g3"
+        ]
+      },
+      "responses": [
+        {
+          "status": 201,
+          "body": {
+            "ok": true,
+            "outfit": {
+              "id": "o1",
+              "category": "outfit",
+              "subcategory": null,
+              "description": "a navy polo, black jeans",
+              "prompt": "Substitute the current top with a navy polo shown at the top and the current pants with black jeans shown at the bottom of the reference image, matching each item's color, material, and fit.",
+              "enhancePrompt": true,
+              "items": [
+                "g1",
+                "g3"
+              ],
+              "createdAt": "2026-11-26T12:24:10.031Z"
+            }
+          }
+        }
+      ],
+      "expectRequests": [
+        {
+          "method": "POST",
+          "path": "/live/outfits",
+          "body": {
+            "garment_ids": [
+              "g1",
+              "g3"
+            ]
+          }
+        }
+      ],
+      "expectResult": {
+        "id": "o1",
+        "category": "outfit",
+        "subcategory": null,
+        "description": "a navy polo, black jeans",
+        "prompt": "Substitute the current top with a navy polo shown at the top and the current pants with black jeans shown at the bottom of the reference image, matching each item's color, material, and fit.",
+        "enhancePrompt": true,
+        "items": [
+          "g1",
+          "g3"
+        ],
+        "createdAt": "2026-11-26T12:24:10.031Z"
+      }
+    },
+    {
+      "name": "prepareLiveOutfit with overrides",
+      "method": "prepareLiveOutfit",
+      "params": {
+        "garmentIds": [
+          "g1",
+          "g3"
+        ],
+        "instructions": "Dress them in the polo and jeans.",
+        "enhancePrompt": false
+      },
+      "responses": [
+        {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "outfit": {
+              "id": "o1",
+              "category": "outfit",
+              "subcategory": null,
+              "description": "a navy polo, black jeans",
+              "prompt": "Dress them in the polo and jeans.",
+              "enhancePrompt": false,
+              "items": [
+                "g1",
+                "g3"
+              ],
+              "createdAt": "2026-11-26T12:24:10.031Z"
+            }
+          }
+        }
+      ],
+      "expectRequests": [
+        {
+          "method": "POST",
+          "path": "/live/outfits",
+          "body": {
+            "garment_ids": [
+              "g1",
+              "g3"
+            ],
+            "instructions": "Dress them in the polo and jeans.",
+            "enhance_prompt": false
+          }
+        }
+      ],
+      "expectResult": {
+        "id": "o1",
+        "category": "outfit",
+        "subcategory": null,
+        "description": "a navy polo, black jeans",
+        "prompt": "Dress them in the polo and jeans.",
+        "enhancePrompt": false,
+        "items": [
+          "g1",
+          "g3"
+        ],
+        "createdAt": "2026-11-26T12:24:10.031Z"
+      }
     },
     {
       "name": "startLiveSession returns the whole response unchanged",
@@ -194,6 +370,9 @@
               "category": "clothing",
               "subcategory": "tops",
               "description": null,
+              "prompt": "p",
+              "enhancePrompt": true,
+              "items": null,
               "createdAt": "2026-11-26T12:20:59.512Z",
               "input": { "prompt": "p", "enhancePrompt": true, "referenceImage": "data:image/jpeg;base64,AA" }
             }
