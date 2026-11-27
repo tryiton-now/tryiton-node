@@ -94,6 +94,41 @@ await client.getLiveConfig();                    // { enabled, secondsPerCredit,
 Billing is per `secondsPerCredit` seconds of streamed video, from the first try-on frame. Garment switches during a
 session are free.
 
+`prepareLiveGarment` also takes optional overrides:
+
+```ts
+await client.prepareLiveGarment({
+  garmentImage: productImageUrl,
+  category: "footwear",
+  detailImages: [sideViewUrl, backViewUrl],               // up to 3 extra views; they only sharpen the description
+  description: "black leather knee-high boots",           // your description (max 200), used in the generated prompt
+  instructions: "Replace only the shoes with the boots.", // or your own prompt (max 1000), used verbatim
+  enhancePrompt: false,                                   // keep the prompt as-is (default true)
+});
+```
+
+### Outfits
+
+Combine 2–3 prepared garments into one outfit worn together. The outfit's `id` works wherever a garment id does
+(`startLiveSession`, the browser's `switchGarment`). To swap one item, prepare the new combination (cached) and switch to it.
+
+```ts
+const top = await client.prepareLiveGarment({ garmentImage: shirtUrl, category: "clothing", subcategory: "tops" });
+const trousers = await client.prepareLiveGarment({ garmentImage: trousersUrl, category: "clothing", subcategory: "bottoms" });
+const shoes = await client.prepareLiveGarment({ garmentImage: shoesUrl, category: "footwear" });
+
+const outfit = await client.prepareLiveOutfit({ garmentIds: [top.id, trousers.id, shoes.id] });
+// outfit.category === "outfit", outfit.items = the garment ids top to bottom
+const start = await client.startLiveSession({ garmentId: outfit.id, endUserId: shopper.id });
+
+// Later the shopper picks another top: prepare that outfit and switch the running stream to it.
+const jacket = await client.prepareLiveGarment({ garmentImage: jacketUrl, category: "clothing", subcategory: "tops" });
+const next = await client.prepareLiveOutfit({ garmentIds: [jacket.id, trousers.id, shoes.id] });
+// In the browser (tryiton-live): await live.switchGarment(next.id);
+```
+
+`prepareLiveOutfit` also takes `instructions` and `enhancePrompt`, as above.
+
 ## Error handling
 
 All failures throw `TryItOnError`, which carries the HTTP status code and the API error name.

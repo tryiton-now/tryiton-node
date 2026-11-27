@@ -31,6 +31,7 @@ export type {
   ModerationLevel,
   OutputFormat,
   PrepareLiveGarmentParams,
+  PrepareLiveOutfitParams,
   StartLiveSessionParams,
   StatusResponse,
   TattooRegion,

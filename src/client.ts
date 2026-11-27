@@ -10,6 +10,7 @@ import type {
   LiveSession,
   LiveSessionStart,
   PrepareLiveGarmentParams,
+  PrepareLiveOutfitParams,
   StartLiveSessionParams,
   StatusResponse,
   TryItOnOptions,
@@ -100,13 +101,36 @@ export class TryItOn {
   }
 
   /**
-   * Prepare a garment for live try-on. Do it ahead (e.g. at catalog sync): it's cached per image and category,
-   * so starting a session or switching garments later is instant.
+   * Prepare a garment for live try-on. Do it ahead (e.g. at catalog sync): it's cached per image, category and
+   * overrides, so starting a session or switching garments later is instant.
    */
   async prepareLiveGarment(params: PrepareLiveGarmentParams): Promise<LiveGarment> {
-    const body = { garment_image: params.garmentImage, category: params.category, subcategory: params.subcategory };
+    const body = {
+      garment_image: params.garmentImage,
+      category: params.category,
+      subcategory: params.subcategory,
+      detail_images: params.detailImages,
+      description: params.description,
+      instructions: params.instructions,
+      enhance_prompt: params.enhancePrompt,
+    };
     const res = await this.request<{ garment: LiveGarment }>("POST", "/live/garments", body);
     return res.garment;
+  }
+
+  /**
+   * Combine 2–3 prepared garments into one outfit worn together. The result has `category: "outfit"` and its `id`
+   * works wherever a garment id does (startLiveSession, the browser's switchGarment). Cached per set of garments and
+   * overrides, so swapping one item is preparing the new set and switching to it.
+   */
+  async prepareLiveOutfit(params: PrepareLiveOutfitParams): Promise<LiveGarment> {
+    const body = {
+      garment_ids: params.garmentIds,
+      instructions: params.instructions,
+      enhance_prompt: params.enhancePrompt,
+    };
+    const res = await this.request<{ outfit: LiveGarment }>("POST", "/live/outfits", body);
+    return res.outfit;
   }
 
   /**

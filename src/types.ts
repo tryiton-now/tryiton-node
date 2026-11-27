@@ -145,14 +145,38 @@ export interface PrepareLiveGarmentParams {
   category?: Category;
   /** e.g. "tops" for clothing. */
   subcategory?: string;
+  /** Up to 3 extra views (URLs or base64 data URLs). They only sharpen the description; the stream uses `garmentImage`. */
+  detailImages?: string[];
+  /** Your own item description (max 200 chars), used inside the generated prompt instead of the detected one. */
+  description?: string;
+  /** Your own prompt (max 1000 chars), used verbatim instead of the generated one. */
+  instructions?: string;
+  /** Let the stream rewrite the prompt for best results. The API defaults to true; pass false to use it as-is. */
+  enhancePrompt?: boolean;
+}
+
+export interface PrepareLiveOutfitParams {
+  /** 2–3 distinct prepared garment ids worn together (e.g. top, trousers, shoes). Order doesn't matter. */
+  garmentIds: string[];
+  /** Your own prompt (max 1000 chars), used verbatim instead of the generated one. */
+  instructions?: string;
+  /** Let the stream rewrite the prompt for best results. The API defaults to true; pass false to use it as-is. */
+  enhancePrompt?: boolean;
 }
 
 export interface LiveGarment {
   /** Pass to startLiveSession / switchGarment. */
   id: string;
-  category: string;
+  /** The item's category, or "outfit" for a prepareLiveOutfit result. */
+  category: Category | "outfit" | (string & {});
   subcategory: string | null;
   description: string | null;
+  /** The prompt the stream uses for this garment. */
+  prompt: string;
+  /** Whether the stream rewrites `prompt` for best results. */
+  enhancePrompt: boolean;
+  /** An outfit's garment ids, top to bottom; null for a single garment. */
+  items: string[] | null;
   createdAt: string;
 }
 

@@ -51,6 +51,7 @@ const calls: Record<string, (client: TryItOn, p: any) => Promise<unknown>> = {
   waitForResult: (c, p) => c.waitForResult(p.jobId, { pollIntervalMs: 0 }),
   getLiveConfig: (c) => c.getLiveConfig(),
   prepareLiveGarment: (c, p) => c.prepareLiveGarment(p),
+  prepareLiveOutfit: (c, p) => c.prepareLiveOutfit(p),
   startLiveSession: (c, p) => c.startLiveSession(p),
   getLiveSession: (c, p) => c.getLiveSession(p.sessionId),
   stopLiveSession: (c, p) => c.stopLiveSession(p.sessionId),
